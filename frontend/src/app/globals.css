@@ -1,0 +1,148 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────
+   VectrazAI Theme System — 4 themes, applied via [data-theme] on <html>.
+   Every component reads colors through these CSS variables (never
+   hardcodes hex values) so switching themes recolors the entire site
+   instantly, on every page, including the admin panel.
+   ───────────────────────────────────────────────────────────────────── */
+
+:root {
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.14), 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Light (default) ─────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f6fb;
+  --bg-elevated: #ffffff;
+  --bg-hover: #eef1f8;
+  --text-primary: #10172a;
+  --text-secondary: #4b5670;
+  --text-muted: #8992a8;
+  --border: #e4e8f1;
+  --accent: #2456ff;
+  --accent-hover: #1a3fd6;
+  --accent-soft: #eaf0ff;
+  --accent-contrast: #ffffff;
+  --success: #16a34a;
+  --danger: #e11d48;
+  --warning: #d97706;
+  --gradient-hero: linear-gradient(135deg, #2456ff 0%, #6d8bff 50%, #9ab3ff 100%);
+}
+
+/* ── Dark ─────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-primary: #0b0f1a;
+  --bg-secondary: #10162a;
+  --bg-elevated: #161d2f;
+  --bg-hover: #1c2438;
+  --text-primary: #f2f5fc;
+  --text-secondary: #aab2c9;
+  --text-muted: #6c7591;
+  --border: #232c44;
+  --accent: #5b82ff;
+  --accent-hover: #7b9bff;
+  --accent-soft: #1a2547;
+  --accent-contrast: #ffffff;
+  --success: #34d399;
+  --danger: #fb7185;
+  --warning: #fbbf24;
+  --gradient-hero: linear-gradient(135deg, #1a2547 0%, #2c3d7a 50%, #4a5fb8 100%);
+}
+
+/* ── Aurora — vivid indigo/purple with teal-cyan accents ─────────── */
+[data-theme="aurora"] {
+  --bg-primary: #0e0b26;
+  --bg-secondary: #171236;
+  --bg-elevated: #1e1745;
+  --bg-hover: #271d59;
+  --text-primary: #f4f1ff;
+  --text-secondary: #bcb2e8;
+  --text-muted: #8478b8;
+  --border: #33285f;
+  --accent: #22e0c9;
+  --accent-hover: #4ff0dc;
+  --accent-soft: #1c2f4d;
+  --accent-contrast: #0e0b26;
+  --success: #22e0c9;
+  --danger: #ff5d8f;
+  --warning: #ffb84d;
+  --gradient-hero: linear-gradient(135deg, #6d28d9 0%, #9333ea 45%, #22e0c9 100%);
+}
+
+/* ── Graphite — warm charcoal with amber accent, editorial feel ──── */
+[data-theme="graphite"] {
+  --bg-primary: #17181b;
+  --bg-secondary: #1e2024;
+  --bg-elevated: #25272c;
+  --bg-hover: #2c2f35;
+  --text-primary: #f2ede4;
+  --text-secondary: #b8b2a6;
+  --text-muted: #7d786e;
+  --border: #34373d;
+  --accent: #f2a341;
+  --accent-hover: #ffb75e;
+  --accent-soft: #2e2617;
+  --accent-contrast: #17181b;
+  --success: #7bd88f;
+  --danger: #ef6461;
+  --warning: #f2a341;
+  --gradient-hero: linear-gradient(135deg, #3a2f1f 0%, #6b4a23 50%, #f2a341 100%);
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+* {
+  border-color: var(--border);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* Thin, theme-aware scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Utility classes bridging Tailwind with theme variables, used across
+   vectraz-* namespaced components. */
+.vectraz-surface {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+.vectraz-text-muted {
+  color: var(--text-muted);
+}
+.vectraz-accent-text {
+  color: var(--accent);
+}

@@ -1,0 +1,33 @@
+{
+  "name": "vectrazai",
+  "private": true,
+  "version": "0.1.0",
+  "description": "VectrazAI - AI & semiconductor/chip/GPU news portal monorepo",
+  "workspaces": [
+    "frontend",
+    "packages/*",
+    "services/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n AUTH,MAIN,WEB -c blue,green,magenta \"npm run dev -w services/auth-service\" \"npm run dev -w services/main-service\" \"npm run dev -w frontend\"",
+    "dev:auth": "npm run dev -w services/auth-service",
+    "dev:main": "npm run dev -w services/main-service",
+    "dev:web": "npm run dev -w frontend",
+    "build": "npm run build -w packages/db && npm run build -w services/auth-service && npm run build -w services/main-service && npm run build -w frontend",
+    "db:generate": "npm run generate -w packages/db",
+    "db:push": "npm run push -w packages/db",
+    "db:migrate": "npm run migrate -w packages/db",
+    "db:seed": "npm run seed -w packages/db",
+    "db:studio": "npm run studio -w packages/db",
+    "docker:db:up": "docker compose up -d postgres",
+    "docker:db:down": "docker compose down",
+    "postinstall": "npm run build --workspace=packages/db --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}

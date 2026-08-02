@@ -1,0 +1,318 @@
+// ─────────────────────────────────────────────────────────────────────
+// VectrazAI — Shared Prisma Schema (Phase 2)
+// Used by BOTH auth-service and main-service via @vectrazai/db.
+// ─────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────────── Enums ──────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  EXPIRED
+  TRIAL
+}
+
+enum ArticleStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum NotificationType {
+  NEW_ARTICLE
+  SYSTEM
+  SUBSCRIPTION
+  ADMIN
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+
+enum OtpPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  LOGIN_2FA
+}
+
+enum ReportReason {
+  INACCURATE
+  SPAM
+  OFFENSIVE
+  DUPLICATE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+}
+
+enum NewsSourceType {
+  NEWSAPI
+  GNEWS
+  NEWSDATA
+  MEDIASTACK
+  GUARDIAN
+  HACKERNEWS
+  ARXIV
+  REDDIT
+  RSS
+  CURRENTS
+  GDELT
+  GOOGLE_NEWS
+  BING_NEWS
+}
+
+// ──────────────────────────── Core models ─────────────────────────────
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String
+  name            String
+  avatarUrl       String?
+  role            Role      @default(USER)
+  isEmailVerified Boolean   @default(false)
+  isBlocked       Boolean   @default(false)
+  blockedReason   String?
+  lastLoginAt     DateTime?
+
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  preferences   UserCategoryPreference[]
+  subscriptions Subscription[]
+  notifications Notification[]
+  reports       ArticleReport[]
+  refreshTokens RefreshToken[]
+  otpCodes      OtpCode[]
+  auditLogs     AuditLog[]
+  articleViews  ArticleView[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([role])
+  @@index([isBlocked])
+}
+
+model Company {
+  id     String  @id @default(uuid())
+  name   String
+  domain String? @unique
+
+  members       User[]
+  subscriptions Subscription[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id          String  @id @default(uuid())
+  slug        String  @unique
+  name        String
+  description String?
+  clickCount  Int     @default(0)
+
+  articles    NewsArticle[]             @relation("ArticleCategories")
+  preferences UserCategoryPreference[]
+
+  createdAt DateTime @default(now())
+
+  @@index([clickCount])
+}
+
+model UserCategoryPreference {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, categoryId])
+}
+
+model NewsArticle {
+  id         String  @id @default(uuid())
+  externalId String? @unique // dedupe key: hash of source+url
+  slug       String  @unique
+
+  title    String
+  summary  String  @db.Text
+  content  String? @db.Text
+  url      String
+  imageUrl String?
+  author   String?
+
+  sourceName String
+  sourceType NewsSourceType
+
+  aiGenerated        Boolean  @default(false) // was this article/summary AI-authored, vs human journalism
+  matchedKeywords    String[] // which AI/chip/GPU/etc. keywords triggered inclusion — useful for debugging the filter
+  aiFilterConfidence Float? // set when OPENAI_API_KEY filtering path is used
+
+  status ArticleStatus @default(APPROVED)
+
+  views  Int @default(0)
+  clicks Int @default(0)
+
+  categories Category[] @relation("ArticleCategories")
+
+  reports       ArticleReport[]
+  notifications Notification[]
+  viewEvents    ArticleView[]
+
+  publishedAt DateTime
+  fetchedAt   DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([publishedAt])
+  @@index([status])
+  @@index([sourceType])
+}
+
+model ArticleView {
+  id        String      @id @default(uuid())
+  articleId String
+  article   NewsArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sessionId String? // anonymous visitor tracking (cookie-based, no PII)
+  viewedAt  DateTime    @default(now())
+
+  @@index([articleId, viewedAt])
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  userId    String?
+  user      User?              @relation(fields: [userId], references: [id])
+  companyId String?
+  company   Company?           @relation(fields: [companyId], references: [id])
+  plan      SubscriptionPlan   @default(FREE)
+  status    SubscriptionStatus @default(ACTIVE)
+
+  // Real payment isn't wired up yet — this flags demo/dummy upgrades so the
+  // admin dashboard can distinguish real revenue from test toggles later.
+  isDummyPayment Boolean @default(true)
+
+  startDate DateTime  @default(now())
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Notification {
+  id        String             @id @default(uuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  status    NotificationStatus @default(UNREAD)
+  title     String
+  message   String
+  articleId String?
+  article   NewsArticle?       @relation(fields: [articleId], references: [id], onDelete: SetNull)
+  createdAt DateTime           @default(now())
+
+  @@index([userId, status])
+}
+
+model ArticleReport {
+  id        String       @id @default(uuid())
+  articleId String
+  article   NewsArticle  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason    ReportReason
+  details   String?
+  status    ReportStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+
+  @@index([status])
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  action        String // e.g. "USER_BLOCKED", "ARTICLE_APPROVED", "SUBSCRIPTION_CHANGED"
+  performedById String?
+  performedBy   User?    @relation(fields: [performedById], references: [id], onDelete: SetNull)
+  targetType    String? // e.g. "User", "NewsArticle"
+  targetId      String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+}
+
+// ─────────────────────────── Auth-service models ───────────────────────
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model OtpCode {
+  id         String     @id @default(uuid())
+  userId     String?
+  user       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email      String
+  codeHash   String
+  purpose    OtpPurpose
+  attempts   Int        @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime   @default(now())
+
+  @@index([email, purpose])
+}
+
+// ─────────────────────── News aggregation monitoring ───────────────────
+
+model NewsSourceLog {
+  id              String         @id @default(uuid())
+  sourceType      NewsSourceType
+  success         Boolean
+  articlesFetched Int            @default(0)
+  errorMessage    String?
+  ranAt           DateTime       @default(now())
+
+  @@index([sourceType, ranAt])
+}

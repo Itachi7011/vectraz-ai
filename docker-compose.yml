@@ -1,0 +1,30 @@
+version: "3.9"
+
+# Local development Postgres for VectrazAI.
+# Run:  npm run docker:db:up
+# Stop: npm run docker:db:down
+#
+# In production you will point DATABASE_URL at a managed Postgres instance
+# (Neon, Supabase, RDS, Railway, etc.) instead of this container.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: vectrazai-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vectrazai
+      POSTGRES_PASSWORD: vectrazai_dev_password
+      POSTGRES_DB: vectrazai
+    ports:
+      - "5432:5432"
+    volumes:
+      - vectrazai_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vectrazai -d vectrazai"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  vectrazai_pgdata:
