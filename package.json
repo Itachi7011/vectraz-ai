@@ -21,7 +21,7 @@
     "db:studio": "npm run studio -w packages/db",
     "docker:db:up": "docker compose up -d postgres",
     "docker:db:down": "docker compose down",
-    "postinstall": "npm run build --workspace=packages/db --if-present"
+    "postinstall": "npm run build --workspace=packages/db --if-present || echo '[postinstall] packages/db build failed or skipped - continuing (only auth-service/main-service actually need it)'"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"
