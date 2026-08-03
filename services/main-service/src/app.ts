@@ -12,6 +12,12 @@ import preferencesRoutes from "./routes/preferencesRoutes";
 import subscriptionRoutes from "./routes/subscriptionRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
 import adminRoutes from "./routes/adminRoutes";
+import companyRoutes from "./routes/companyRoutes";
+import podcastRoutes from "./routes/podcastRoutes";
+import savedArticleRoutes from "./routes/savedArticleRoutes";
+import githubRoutes from "./routes/githubRoutes";
+import jobsRoutes from "./routes/jobsRoutes";
+import stockRoutes from "./routes/stockRoutes";
 import { errorMiddleware } from "./middlewares/errorMiddleware";
 
 const app = express();
@@ -46,6 +52,12 @@ app.use("/api/preferences", preferencesRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/companies", companyRoutes);
+app.use("/api/podcasts", podcastRoutes);
+app.use("/api/saved", savedArticleRoutes);
+app.use("/api/github-trending", githubRoutes);
+app.use("/api/jobs", jobsRoutes);
+app.use("/api/stocks", stockRoutes);
 
 app.use((req: Request, res: Response) => {
   res.status(404).json({ error: "Not found", path: req.originalUrl });

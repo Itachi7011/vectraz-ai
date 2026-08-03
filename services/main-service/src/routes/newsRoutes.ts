@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as newsController from "../controllers/newsController";
 import * as reportController from "../controllers/reportController";
+import * as savedArticleController from "../controllers/savedArticleController";
 import { validateRequest } from "../middlewares/validateRequest";
 import { listNewsSchema, trendingSchema, reportArticleSchema } from "../validators/newsValidators";
 import { requireAuth, attachUserIfPresent } from "../middlewares/authMiddleware";
@@ -17,5 +18,7 @@ router.post(
   validateRequest(reportArticleSchema),
   reportController.reportArticle
 );
+router.post("/:slug/save", requireAuth, savedArticleController.saveArticle);
+router.delete("/:slug/save", requireAuth, savedArticleController.unsaveArticle);
 
 export default router;

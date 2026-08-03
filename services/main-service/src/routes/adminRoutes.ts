@@ -26,6 +26,7 @@ router.get("/analytics/categories", adminController.analyticsCategoryBreakdown);
 // News sources & moderation
 router.get("/news-sources/health", adminController.newsSourceHealth);
 router.post("/news/refresh", adminController.triggerNewsRefresh);
+router.post("/digest/send-now", adminController.triggerDigestNow);
 router.get("/articles", validateRequest(listArticlesAdminSchema), adminController.listArticlesAdmin);
 router.post("/articles/:id/approve", adminController.approveArticle);
 router.post("/articles/:id/reject", adminController.rejectArticle);

@@ -12,5 +12,10 @@ router.put(
   validateRequest(preferencesController.updatePreferencesSchema),
   preferencesController.updatePreferences
 );
+router.patch(
+  "/digest",
+  validateRequest(preferencesController.updateDigestSchema),
+  preferencesController.updateDigestPreference
+);
 
 export default router;

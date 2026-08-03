@@ -14,6 +14,7 @@ function sanitizeUser(user: {
   role: string;
   avatarUrl: string | null;
   isEmailVerified: boolean;
+  emailDigestEnabled: boolean;
   createdAt: Date;
 }) {
   return {
@@ -23,6 +24,7 @@ function sanitizeUser(user: {
     role: user.role,
     avatarUrl: user.avatarUrl,
     isEmailVerified: user.isEmailVerified,
+    emailDigestEnabled: user.emailDigestEnabled,
     createdAt: user.createdAt,
   };
 }

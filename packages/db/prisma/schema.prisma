@@ -87,6 +87,12 @@ enum NewsSourceType {
   BING_NEWS
 }
 
+enum Sentiment {
+  POSITIVE
+  NEGATIVE
+  NEUTRAL
+}
+
 // ──────────────────────────── Core models ─────────────────────────────
 
 model User {
@@ -99,6 +105,7 @@ model User {
   isEmailVerified Boolean   @default(false)
   isBlocked       Boolean   @default(false)
   blockedReason   String?
+  emailDigestEnabled Boolean @default(true)
   lastLoginAt     DateTime?
 
   companyId String?
@@ -112,6 +119,7 @@ model User {
   otpCodes      OtpCode[]
   auditLogs     AuditLog[]
   articleViews  ArticleView[]
+  savedArticles SavedArticle[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -178,6 +186,7 @@ model NewsArticle {
   aiFilterConfidence Float? // set when OPENAI_API_KEY filtering path is used
 
   status ArticleStatus @default(APPROVED)
+  sentiment Sentiment @default(NEUTRAL)
 
   views  Int @default(0)
   clicks Int @default(0)
@@ -187,6 +196,7 @@ model NewsArticle {
   reports       ArticleReport[]
   notifications Notification[]
   viewEvents    ArticleView[]
+  savedBy       SavedArticle[]
 
   publishedAt DateTime
   fetchedAt   DateTime @default(now())
@@ -305,6 +315,18 @@ model OtpCode {
 }
 
 // ─────────────────────── News aggregation monitoring ───────────────────
+
+model SavedArticle {
+  id        String      @id @default(uuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId String
+  article   NewsArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt DateTime    @default(now())
+
+  @@unique([userId, articleId])
+  @@index([userId])
+}
 
 model NewsSourceLog {
   id              String         @id @default(uuid())

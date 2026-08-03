@@ -20,6 +20,14 @@ const envSchema = z.object({
   // best "safe" keyed free source. https://currentsapi.services
   CURRENTS_API_KEY: z.string().optional().default(""),
 
+  // Free tier: 60 calls/min, no credit card. https://finnhub.io
+  FINNHUB_API_KEY: z.string().optional().default(""),
+
+  // Weekly digest email (main-service sends its own, independent of auth-service)
+  SENDGRID_API_KEY: z.string().optional().default(""),
+  SENDGRID_FROM_EMAIL: z.string().default("no-reply@vectrazai.dev"),
+  DIGEST_CRON: z.string().default("0 9 * * 1"), // 9am every Monday
+
   OPENAI_API_KEY: z.string().optional().default(""),
 
   NEWS_FETCH_CRON: z.string().default("*/30 * * * *"), // every 30 min by default
@@ -36,3 +44,5 @@ if (!parsed.success) {
 export const env = parsed.data;
 
 export const isOpenAiConfigured = env.OPENAI_API_KEY.trim().length > 0;
+export const isFinnhubConfigured = env.FINNHUB_API_KEY.trim().length > 0;
+export const isSendGridConfigured = env.SENDGRID_API_KEY.trim().length > 0;

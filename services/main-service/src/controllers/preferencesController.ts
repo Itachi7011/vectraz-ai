@@ -9,6 +9,19 @@ export const updatePreferencesSchema = z.object({
   }),
 });
 
+export const updateDigestSchema = z.object({
+  body: z.object({
+    enabled: z.boolean(),
+  }),
+});
+
+// ── PATCH /api/preferences/digest ────────────────────────────────────
+export const updateDigestPreference = asyncHandler(async (req: Request, res: Response) => {
+  const { enabled } = req.body as { enabled: boolean };
+  await prisma.user.update({ where: { id: req.user!.sub }, data: { emailDigestEnabled: enabled } });
+  res.json({ emailDigestEnabled: enabled });
+});
+
 // ── GET /api/preferences ─────────────────────────────────────────────
 export const getPreferences = asyncHandler(async (req: Request, res: Response) => {
   const preferences = await prisma.userCategoryPreference.findMany({

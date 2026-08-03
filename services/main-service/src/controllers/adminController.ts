@@ -4,6 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "../utils/ApiError";
 import { resolveDateRange } from "../utils/dateRange";
 import { runAggregation } from "../services/newsAggregator/aggregate";
+import { runWeeklyDigest } from "../services/digest/generateDigest";
 
 // ── GET /api/admin/users ─────────────────────────────────────────────
 export const listUsers = asyncHandler(async (req: Request, res: Response) => {
@@ -215,6 +216,15 @@ export const triggerNewsRefresh = asyncHandler(async (req: Request, res: Respons
     data: { action: "NEWS_REFRESH_TRIGGERED", performedById: req.user!.sub },
   });
   res.status(202).json({ message: "News aggregation started in the background." });
+});
+
+// ── POST /api/admin/digest/send-now ──────────────────────────────────
+export const triggerDigestNow = asyncHandler(async (req: Request, res: Response) => {
+  runWeeklyDigest().catch((err) => console.error("Manual digest trigger failed:", err));
+  await prisma.auditLog.create({
+    data: { action: "DIGEST_TRIGGERED", performedById: req.user!.sub },
+  });
+  res.status(202).json({ message: "Digest send started in the background." });
 });
 
 // ── GET /api/admin/articles ──────────────────────────────────────────

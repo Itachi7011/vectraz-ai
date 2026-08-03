@@ -7,6 +7,23 @@ export const listNewsSchema = z.object({
     category: z.string().optional(),
     sort: z.enum(["latest", "trending", "most-viewed"]).default("latest"),
     q: z.string().trim().max(200).optional(),
+    sourceType: z
+      .enum([
+        "NEWSAPI",
+        "GNEWS",
+        "NEWSDATA",
+        "MEDIASTACK",
+        "GUARDIAN",
+        "HACKERNEWS",
+        "ARXIV",
+        "REDDIT",
+        "RSS",
+        "CURRENTS",
+        "GDELT",
+        "GOOGLE_NEWS",
+        "BING_NEWS",
+      ])
+      .optional(),
   }),
 });
 

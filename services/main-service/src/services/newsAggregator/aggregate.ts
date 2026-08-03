@@ -1,6 +1,7 @@
 import { prisma } from "@vectrazai/db";
 import { slugify, externalIdFor } from "../../utils/slugify";
 import { classifyArticle } from "./aiFilter";
+import { classifySentiment } from "../../keywords/sentiment";
 import { dedupeArticles } from "./dedupe";
 import { fetchNewsApi } from "./sources/newsApiSource";
 import { fetchGNews } from "./sources/gnewsSource";
@@ -90,6 +91,7 @@ export async function runAggregation(): Promise<AggregationSummary> {
       relevantCount++;
 
       const externalId = externalIdFor(article.sourceType, article.url);
+      const sentiment = classifySentiment(article.title, article.summary);
       const categoryIds = classification.categorySlugs
         .map((slug) => categoryBySlug.get(slug)?.id)
         .filter((id): id is string => Boolean(id));
@@ -105,6 +107,7 @@ export async function runAggregation(): Promise<AggregationSummary> {
             imageUrl: article.imageUrl,
             matchedKeywords: classification.matchedKeywords,
             aiFilterConfidence: classification.confidence,
+            sentiment,
           },
           create: {
             externalId,
@@ -119,6 +122,7 @@ export async function runAggregation(): Promise<AggregationSummary> {
             sourceType: article.sourceType,
             matchedKeywords: classification.matchedKeywords,
             aiFilterConfidence: classification.confidence,
+            sentiment,
             publishedAt: article.publishedAt,
             status: "APPROVED",
             categories: { connect: categoryIds.map((id) => ({ id })) },

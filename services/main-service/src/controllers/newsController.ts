@@ -5,16 +5,18 @@ import { ApiError } from "../utils/ApiError";
 
 // ── GET /api/news ────────────────────────────────────────────────────
 export const listNews = asyncHandler(async (req: Request, res: Response) => {
-  const { page, limit, category, sort, q } = req.query as unknown as {
+  const { page, limit, category, sort, q, sourceType } = req.query as unknown as {
     page: number;
     limit: number;
     category?: string;
     sort: "latest" | "trending" | "most-viewed";
     q?: string;
+    sourceType?: string;
   };
 
   const where: any = { status: "APPROVED" };
   if (category) where.categories = { some: { slug: category } };
+  if (sourceType) where.sourceType = sourceType;
   if (q) {
     where.OR = [
       { title: { contains: q, mode: "insensitive" } },
