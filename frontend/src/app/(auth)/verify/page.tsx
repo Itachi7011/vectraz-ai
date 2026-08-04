@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { AuthCard, AuthButton } from "@/components/ui/AuthCard";
 import { useAuth } from "@/context/AuthContext";
 import { ApiRequestError } from "@/lib/api";
 
-export default function VerifyOtpPage() {
+function VerifyOtpForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { verifyOtp, resendOtp } = useAuth();
@@ -98,5 +98,13 @@ export default function VerifyOtpPage() {
         {cooldown > 0 ? `Resend code in ${cooldown}s` : "Resend code"}
       </button>
     </AuthCard>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 64, textAlign: "center", color: "var(--text-muted)" }}>Loading…</div>}>
+      <VerifyOtpForm />
+    </Suspense>
   );
 }
