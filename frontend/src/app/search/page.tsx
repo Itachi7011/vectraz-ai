@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search as SearchIcon } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { NewsCard } from "@/components/news/NewsCard";
 import type { Article } from "@/types";
 
-export default function SearchPage() {
+function SearchResults() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const initialQ = searchParams.get("q") ?? "";
@@ -85,5 +85,13 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 64, textAlign: "center", color: "var(--text-muted)" }}>Loading…</div>}>
+      <SearchResults />
+    </Suspense>
   );
 }

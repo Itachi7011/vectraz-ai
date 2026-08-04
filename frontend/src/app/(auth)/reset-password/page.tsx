@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { AuthCard, AuthInput, AuthButton } from "@/components/ui/AuthCard";
 import { useAuth } from "@/context/AuthContext";
 import { ApiRequestError } from "@/lib/api";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { resetPassword } = useAuth();
@@ -42,5 +42,13 @@ export default function ResetPasswordPage() {
         </AuthButton>
       </form>
     </AuthCard>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 64, textAlign: "center", color: "var(--text-muted)" }}>Loading…</div>}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

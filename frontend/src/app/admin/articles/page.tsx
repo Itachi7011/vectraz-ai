@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, XCircle, Flag } from "lucide-react";
 import { apiFetch } from "@/lib/api";
@@ -16,7 +16,7 @@ type AdminArticle = {
   _count: { reports: number };
 };
 
-export default function AdminArticlesPage() {
+function AdminArticlesList() {
   const searchParams = useSearchParams();
   const status = searchParams.get("status") as AdminArticle["status"] | null;
   const [articles, setArticles] = useState<AdminArticle[]>([]);
@@ -104,6 +104,14 @@ export default function AdminArticlesPage() {
         </table>
       </div>
     </div>
+  );
+}
+
+export default function AdminArticlesPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 48, textAlign: "center", color: "var(--text-muted)" }}>Loading…</div>}>
+      <AdminArticlesList />
+    </Suspense>
   );
 }
 
